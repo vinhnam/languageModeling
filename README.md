@@ -19,9 +19,13 @@ Here we go:
   `node triGram.js`
 
 Then follow the instruction with appropriate parameters.
+
 To train the model again: 
+
   `node triGram.js 1`
+
 To re-calculate the perlexity:
+
   `node triGram.js 2`
 
 #//TODO: 
