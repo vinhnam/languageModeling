@@ -23,8 +23,10 @@ To train the model again:
   `node triGram.js 1`
 To re-calculate the perlexity:
   `node triGram.js 2`
+
+#//TODO: 
 -------
 The 3rd part (sentence generation) will be updated as soon as possible.
-//TODO: dynamic model selection also something could be improved
+dynamic model selection also something could be improved
 
 I let it Open-source at: https://github.com/vinhnam/languageModeling
