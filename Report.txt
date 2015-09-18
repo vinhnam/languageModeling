@@ -1,0 +1,6 @@
+node triGram.js 2
+************Report**************
+total Available word in vocabulary: 114
+total tested word: 306
+total sentence tested: 9
+Perplexity at: 56.167085796911145

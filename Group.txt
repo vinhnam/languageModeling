@@ -1,0 +1,8 @@
++Nguyen Vinh Nam:
+  - Get into async programming with Nodejs
+  - study trigram language model and smoothing techniques
+  - develop the project
+  - disscuss with other team for solutions
+  - basically, everything!
++Obuzo Uchenna Iroha: 
++Oduola Taye Teslim:
