@@ -21,7 +21,7 @@ if (cmlArgs.indexOf(process.argv[2]) >= 0){
     case '1':
       console.log("Training file. Be patient! It gonna take a while (up to 15 mins) ... ");
       trigramModelCreator('brown','brown');
-      trigramModelCreator('reuters','reuters');
+      //trigramModelCreator('reuters','reuters');
       break;
     case '2':
       console.log("Perplexity Calculation started ... ");
@@ -51,6 +51,7 @@ function perplexityCalculation(){
     Object.keys(unigramG).forEach(function(key) {
       globalWordCount += unigramG[key];
     });   
+    globalVarsLoaded = true;
     console.log("Model Loaded!");                    
   }  
 
@@ -61,10 +62,10 @@ function perplexityCalculation(){
   console.log("Start calculate probability of each sentence in test file ...");
   lineReader.eachLine(__dirname +'/brown/brown'+'_test', function(line, last) {
     sentenceTested++;
-    console.log("current process: "+ sentenceTested);
-    line += ' STOP';
+    line = line.toLowerCase().trim();
+    line +=  ' STOP';
     probabilityObj = sentenceProbabilityCal(line); 
-    logProbability += Math.log(probabilityObj['p']);    
+    logProbability += Math.log(probabilityObj['p']); 
     totalWord += probabilityObj['length'];
     if (last){ 
       l = logProbability / totalWord;
@@ -82,10 +83,10 @@ function perplexityCalculation(){
 function availableWordChecker( sentence, index){
   if (index < 0) return '*';
   if(unigramG[sentence[index]] == undefined) return "<UNK>";
-  return sentence[index];
+  return sentence[index].trim();
 }
 function sentenceProbabilityCal(sentence){
-    sentence = sentence.split(' ');
+    sentence = sentence.split(" ");
     var sentenceProbality = 1;
     for (var i = 1; i < sentence.length +1; i++ ) {
       var word = availableWordChecker(sentence, (i-1) );
@@ -97,7 +98,7 @@ function sentenceProbabilityCal(sentence){
 }
 
 function trigramSequence(lastTwoWord, lastWord, word){ // q (wi | w i-1 , w i-2)
-  if(trigramSeriesG[lastTwoWord + ' ' + lastWord] == undefined) return 1; // not effect the others.
+  if(trigramSeriesG[lastTwoWord + ' ' + lastWord] == undefined) return 0.00000000000001; // not effect the others.
   if(trigramSeriesG[lastTwoWord + ' ' + lastWord].length > 0){
     if(trigramSeriesG[lastTwoWord + ' ' + lastWord].indexOf(word) > 0){
       q = (trigramG[lastTwoWord+ ' ' + lastWord + ' ' + word] - 0.5) / bigramG[lastTwoWord + ' ' +  lastWord];
@@ -148,16 +149,71 @@ function unigramAlpha(lastWord){
 
 function gerenateSentence(){
   if(!globalVarsLoaded){
+    console.log("Loading trained Model ...");
     var fs = require('fs');
     unigramG = JSON.parse(fs.readFileSync(__dirname +'/brown/brown_unigram', 'utf8'));
     bigramG = JSON.parse(fs.readFileSync(__dirname +'/brown/brown_bigram', 'utf8'));
     trigramG = JSON.parse(fs.readFileSync(__dirname +'/brown/brown_trigram', 'utf8'));
     bigramSeriesG = JSON.parse(fs.readFileSync(__dirname +'/brown/brown_bigramSeries', 'utf8'));
-    trigramSeriesG = JSON.parse(fs.readFileSync(__dirname +'/brown/brown_trigramSeries', 'utf8'));
+    trigramSeriesG = JSON.parse(fs.readFileSync(__dirname +'/brown/brown_trigramSeries', 'utf8'));  
     globalVarsLoaded = true;
+    console.log("Model Loaded!");                    
+  }
+  var wordsCollections = '';
+  if(process.argv[3] && process.argv[4] 
+    && unigramG[process.argv[3]] && unigramG[process.argv[4]]){
     Object.keys(unigramG).forEach(function(key) {
       globalWordCount += unigramG[key];
-    });     
+    });
+    console.log("valid word, good job! A moment please ... ");
+
+    var mySentence = '';
+    var word1 = process.argv[3];
+    var word2 = process.argv[4];
+    var word3 = '';
+
+    mySentence =  word1 + ' ' + word2 + ' ' + word3;
+    console.log(mySentence);
+
+    for (var i = 0; i < 15 && word3 !== " STOP"; i++) {
+      //console.log(bigramSeriesG[i]);
+      // prob, word_3 = max((get_q_trigram(word_1, word_2, w), w) for w in A_bigram[word_1])
+      var potentialWord1List = bigramSeriesG[word1];
+      var potentialWord2List = bigramSeriesG[word2];
+      var tmpMeasurement = 0;
+      potentialWord1List.forEach(function(w1){
+        potentialWord1List.forEach(function(w2){
+          var m1 = trigramSequence(word1,word2,w1); // w1
+          var m2 = trigramSequence(word1,word2,w2); // w2
+          var m3 = bigramSequence(word2,w2);
+          var mW2 = m3 > m2 ? m3 : m2 ; // bigger potential in w2
+          var mW3 = mW2 > m1 ? mW2 : m1; 
+          var localCandidate = '';
+          if(mW3 ==mW2 ) {
+            localCandidate = w1;
+          } else {
+            localCandidate = w2;
+          }
+
+          if(mW3 >= tmpMeasurement){
+            tmpMeasurement = mW3;
+            // promotion 
+            word3 = localCandidate;
+          }
+        });
+      });
+      mySentence += " "+word3;
+      word1 = word2;
+      word2 = word3;
+      console.log(mySentence);
+    };
+    console.log("Alrigh, this is your sentence:\n " + mySentence);
+  } else {
+    Object.keys(unigramG).forEach(function(key) {
+      wordsCollections += " "+key;
+    });
+    console.log(wordsCollections);    
+    console.log("\nPICK 2 WORDS IN THIS SET ONLY, PLEASE!");
   }
 }
 

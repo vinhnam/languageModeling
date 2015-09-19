@@ -28,9 +28,17 @@ To re-calculate the perlexity:
 
   `node triGram.js 2`
 
-#//TODO: 
+To generate sentence, use the command below:
+
+  `node triGram.js 3`
+
+But you probably have to pick two random word in provided dictionary, for ex:
+
+  `node triGram.js 3 the dog`  
+
+#TODO: 
 -------
-The 3rd part (sentence generation) will be updated as soon as possible.
+Performance is a serious problem here. Does anyone know how to improve the look-up mechanics in nodejs?
 dynamic model selection also something could be improved
 
 I let it Open-source at: https://github.com/vinhnam/languageModeling
